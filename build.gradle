@@ -1,0 +1,14 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+repositories 
+{
+	mavenCentral()
+}
+
+dependencies
+{
+	compile 'org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5'
+	compile 'com.google.guava:guava:18.0'
+	compile 'com.google.code.gson:gson:2.3.1'
+}
