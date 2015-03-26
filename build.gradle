@@ -8,8 +8,8 @@ repositories
 
 dependencies
 {
-	compile 'org.kohsuke:github-api:1.66'
 	compile 'com.google.guava:guava:18.0'
 	compile 'com.google.code.gson:gson:2.3.1'
-	compile 'net.sf.jopt-simple:jopt-simple:4.9-beta-1'
+	compile 'com.jcabi:jcabi-github:0.21.4'
+	compile 'commons-cli:commons-cli:1.2'
 }
