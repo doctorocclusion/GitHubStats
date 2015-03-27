@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+import net.eekysam.ghstats.filter.Filterer;
+import net.eekysam.ghstats.sampler.SampleRandom;
+
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -20,13 +23,13 @@ public class Main
 {
 	public static void main(String[] args)
 	{
-		int split = Arrays.asList(args).indexOf("|");
+		int split = Arrays.asList(args).indexOf(":");
 		String[] projargs = args;
 		String[] operargs = new String[0];
 		if (split != -1)
 		{
-			Arrays.copyOfRange(args, split + 1, args.length);
-			Arrays.copyOfRange(args, 0, split);
+			operargs = Arrays.copyOfRange(args, split + 1, args.length);
+			projargs = Arrays.copyOfRange(args, 0, split);
 		}
 		
 		Options options = new Options();
@@ -61,38 +64,43 @@ public class Main
 		}
 		else
 		{
+			File file = null;
 			if (!cmd.hasOption("f"))
 			{
-				System.out.println("Must specify a file!");
-				return;
+				System.out.println("WARNING! A file was not specified!");
 			}
-			File file = new File(cmd.getOptionValue("f"));
-			EnumOutType ot = EnumOutType.NEW;
-			LimitInfo li = LimitInfo.get(gh);
-			System.out.println(li.core);
-			if (cmd.hasOption("o"))
+			else
 			{
-				ot = EnumOutType.OVERWRITE;
-			}
-			else if (cmd.hasOption("a"))
-			{
-				ot = EnumOutType.APPEND;
+				file = new File(cmd.getOptionValue("f"));
 			}
 			if (cmd.hasOption("s"))
 			{
+				LimitInfo li = LimitInfo.get(gh);
+				System.out.println(li.core);
 				try
 				{
-					SampleRandom sr = new SampleRandom(gh, file, ot);
-					sr.sample(operargs);
+					SampleRandom sr = new SampleRandom(gh, file, operargs);
+					sr.sample();
 					sr.write();
 				}
 				catch (IOException | ParseException e)
 				{
 					e.printStackTrace();
 				}
+				li = LimitInfo.get(gh);
+				System.out.println(li.core);
 			}
-			li = LimitInfo.get(gh);
-			System.out.println(li.core);
+			else if (cmd.hasOption("x"))
+			{
+				try
+				{
+					Filterer filter = new Filterer(gh, file, operargs);
+				}
+				catch (IOException | ParseException e)
+				{
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 	
@@ -100,17 +108,14 @@ public class Main
 	public static void getOptions(Options options)
 	{
 		options.addOption(OptionBuilder.hasArg().withLongOpt("file").create("f"));
-		OptionGroup fileedit = new OptionGroup();
-		fileedit.addOption(new Option("o", "overwrite", false, ""));
-		fileedit.addOption(new Option("a", "append", false, ""));
-		options.addOptionGroup(fileedit);
 		options.addOption(OptionBuilder.hasArg().withLongOpt("oauth").create("u"));
 		OptionGroup action = new OptionGroup();
 		action.setRequired(true);
-		action.addOption(new Option("s", "sample", false, ""));
 		action.addOption(new Option("l", "limit", false, ""));
+		action.addOption(new Option("s", "sample", false, ""));
+		action.addOption(new Option("x", "filter", false, ""));
 		action.addOption(new Option("g", "gather", false, ""));
-		action.addOption(new Option("x", "export", false, ""));
+		action.addOption(new Option("e", "export", false, ""));
 		options.addOptionGroup(action);
 	}
 }
