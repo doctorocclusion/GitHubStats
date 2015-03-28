@@ -5,7 +5,7 @@ import java.util.EnumSet;
 public enum FilterVar
 {
 	NAME,
-	ADDED_DIRECT,
+	DIRECT,
 	SELECTED,
 	ID,
 	IS_FORK,

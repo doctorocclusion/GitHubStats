@@ -2,8 +2,10 @@ package net.eekysam.ghstats;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 
+import net.eekysam.ghstats.data.DataFile;
 import net.eekysam.ghstats.filter.Filterer;
 import net.eekysam.ghstats.sampler.SampleRandom;
 
@@ -16,11 +18,17 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import com.jcabi.github.Github;
 import com.jcabi.github.RtGithub;
 
 public class Main
 {
+	public static Gson gson = new GsonBuilder().setPrettyPrinting().create();
+	
 	public static void main(String[] args)
 	{
 		int split = Arrays.asList(args).indexOf(":");
@@ -64,6 +72,7 @@ public class Main
 		}
 		else
 		{
+			DataFile data = null;
 			File file = null;
 			if (!cmd.hasOption("f"))
 			{
@@ -72,14 +81,41 @@ public class Main
 			else
 			{
 				file = new File(cmd.getOptionValue("f"));
+				try
+				{
+					if (!file.exists())
+					{
+						file.createNewFile();
+					}
+					else
+					{
+						JsonReader jread = new JsonReader(Files.newBufferedReader(file.toPath()));
+						data = gson.fromJson(jread, DataFile.class);
+						jread.close();
+					}
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+					return;
+				}
 			}
-			if (cmd.hasOption("s"))
+			if (data == null)
+			{
+				data = new DataFile();
+			}
+			if (cmd.hasOption("a"))
+			{
+				String repo = String.join(" ", operargs);
+				data.addRepo(repo, true);
+			}
+			else if (cmd.hasOption("s"))
 			{
 				LimitInfo li = LimitInfo.get(gh);
 				System.out.println(li.core);
 				try
 				{
-					SampleRandom sr = new SampleRandom(gh, file, operargs);
+					SampleRandom sr = new SampleRandom(gh, data, operargs);
 					sr.sample();
 					sr.write();
 				}
@@ -94,10 +130,25 @@ public class Main
 			{
 				try
 				{
-					Filterer filter = new Filterer(gh, file, operargs);
+					Filterer filter = new Filterer(gh, data, operargs);
 				}
 				catch (IOException | ParseException e)
 				{
+					e.printStackTrace();
+				}
+			}
+			if (file != null)
+			{
+				try
+				{
+					JsonWriter jwrite;
+					jwrite = new JsonWriter(Files.newBufferedWriter(file.toPath()));
+					gson.toJson(data, DataFile.class, jwrite);
+					jwrite.close();
+				}
+				catch (IOException e)
+				{
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -112,6 +163,7 @@ public class Main
 		OptionGroup action = new OptionGroup();
 		action.setRequired(true);
 		action.addOption(new Option("l", "limit", false, ""));
+		action.addOption(new Option("a", "add", false, ""));
 		action.addOption(new Option("s", "sample", false, ""));
 		action.addOption(new Option("x", "filter", false, ""));
 		action.addOption(new Option("g", "gather", false, ""));

@@ -1,6 +1,5 @@
 package net.eekysam.ghstats.filter;
 
-import java.text.ParsePosition;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -9,7 +8,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.util.Iterator;
 
-import net.eekysam.ghstats.data.RepoItem;
+import net.eekysam.ghstats.data.RepoEntry;
 
 import com.fathzer.soft.javaluator.AbstractEvaluator;
 import com.fathzer.soft.javaluator.BracketPair;
@@ -92,9 +91,9 @@ public class FilterEval extends AbstractEvaluator<Object>
 			{
 				return FilterVar.NOT_LOADED;
 			}
-			if (evaluationContext instanceof RepoItem)
+			if (evaluationContext instanceof RepoEntry)
 			{
-				RepoItem repo = (RepoItem) evaluationContext;
+				RepoEntry repo = (RepoEntry) evaluationContext;
 				return repo.getVar(var);
 			}
 			else
@@ -102,9 +101,9 @@ public class FilterEval extends AbstractEvaluator<Object>
 				throw new IllegalArgumentException("The current context does not have any fields!");
 			}
 		}
-		if (literal.startsWith("\"") && literal.endsWith("\""))
+		if (literal.startsWith("'") && literal.endsWith("'"))
 		{
-			return literal;
+			return literal.substring(1, literal.length() - 1);
 		}
 		try
 		{
