@@ -39,11 +39,19 @@ public class Filterer extends Action
 		CommandLineParser parser = new BasicParser();
 		this.cmd = parser.parse(Filterer.options, pars);
 		
-		int numa = 0;
-		int numr = 0;
-		int num = 0;
-		
-		if (this.cmd.hasOption("t"))
+		if (this.cmd.hasOption("i"))
+		{
+			int num = 0;
+			for (RepoEntry repo : this.data.repos.values())
+			{
+				if (repo.selected)
+				{
+					num++;
+				}
+			}
+			System.out.printf("%d/%d repos selected%n", num, this.data.repos.size());
+		}
+		else if (this.cmd.hasOption("t"))
 		{
 			Object out = Filterer.evaler.evaluate(expr);
 			if (out == FilterVar.NOT_LOADED)
@@ -55,47 +63,28 @@ public class Filterer extends Action
 				System.out.println(out);
 			}
 		}
-		else if (this.cmd.hasOption("s"))
+		else
 		{
-			for (RepoEntry repo : this.data.repos.values())
+			int numa = 0;
+			int numr = 0;
+			int num = 0;
+			
+			if (this.cmd.hasOption("s"))
 			{
-				Object result = Filterer.evaler.evaluate(expr, repo);
-				if (result instanceof Boolean)
-				{
-					boolean old = repo.selected;
-					repo.selected = (Boolean) result;
-					boolean now = repo.selected;
-					if (old && !now)
-					{
-						numr++;
-					}
-					else if (!old && now)
-					{
-						numa++;
-					}
-				}
-				else
-				{
-					throw new IllegalArgumentException(String.format("The filter expression returned %s, it must return a boolean!", result.toString()));
-				}
-				if (repo.selected)
-				{
-					num++;
-				}
-			}
-		}
-		else if (this.cmd.hasOption("a"))
-		{
-			for (RepoEntry repo : this.data.repos.values())
-			{
-				if (!repo.selected)
+				for (RepoEntry repo : this.data.repos.values())
 				{
 					Object result = Filterer.evaler.evaluate(expr, repo);
 					if (result instanceof Boolean)
 					{
-						if ((Boolean) result)
+						boolean old = repo.selected;
+						repo.selected = (Boolean) result;
+						boolean now = repo.selected;
+						if (old && !now)
 						{
-							repo.selected = true;
+							numr++;
+						}
+						else if (!old && now)
+						{
 							numa++;
 						}
 					}
@@ -103,40 +92,66 @@ public class Filterer extends Action
 					{
 						throw new IllegalArgumentException(String.format("The filter expression returned %s, it must return a boolean!", result.toString()));
 					}
-				}
-				if (repo.selected)
-				{
-					num++;
+					if (repo.selected)
+					{
+						num++;
+					}
 				}
 			}
-		}
-		else if (this.cmd.hasOption("r"))
-		{
-			for (RepoEntry repo : this.data.repos.values())
+			else if (this.cmd.hasOption("a"))
 			{
-				if (repo.selected)
+				for (RepoEntry repo : this.data.repos.values())
 				{
-					Object result = Filterer.evaler.evaluate(expr, repo);
-					if (result instanceof Boolean)
+					if (!repo.selected)
 					{
-						if ((Boolean) result)
+						Object result = Filterer.evaler.evaluate(expr, repo);
+						if (result instanceof Boolean)
 						{
-							repo.selected = false;
-							numr++;
+							if ((Boolean) result)
+							{
+								repo.selected = true;
+								numa++;
+							}
+						}
+						else
+						{
+							throw new IllegalArgumentException(String.format("The filter expression returned %s, it must return a boolean!", result.toString()));
 						}
 					}
-					else
+					if (repo.selected)
 					{
-						throw new IllegalArgumentException(String.format("The filter expression returned %s, it must return a boolean!", result.toString()));
+						num++;
 					}
 				}
-				if (repo.selected)
+			}
+			else if (this.cmd.hasOption("r"))
+			{
+				for (RepoEntry repo : this.data.repos.values())
 				{
-					num++;
+					if (repo.selected)
+					{
+						Object result = Filterer.evaler.evaluate(expr, repo);
+						if (result instanceof Boolean)
+						{
+							if ((Boolean) result)
+							{
+								repo.selected = false;
+								numr++;
+							}
+						}
+						else
+						{
+							throw new IllegalArgumentException(String.format("The filter expression returned %s, it must return a boolean!", result.toString()));
+						}
+					}
+					if (repo.selected)
+					{
+						num++;
+					}
 				}
 			}
+			System.out.printf("Selection +%d -%d (%d/%d)%n", numa, numr, num, this.data.repos.size());
 		}
-		System.out.printf("Selection +%d -%d (%d/%d)%n", numa, numr, num, this.data.repos.size());
 	}
 	
 	static
@@ -144,7 +159,6 @@ public class Filterer extends Action
 		Filterer.getOptions(Filterer.options);
 	}
 	
-	@SuppressWarnings("static-access")
 	static void getOptions(Options options)
 	{
 		OptionGroup evals = new OptionGroup();
@@ -153,6 +167,7 @@ public class Filterer extends Action
 		evals.addOption(OptionBuilder.create("r"));
 		evals.addOption(OptionBuilder.create("s"));
 		evals.addOption(OptionBuilder.create("t"));
+		evals.addOption(OptionBuilder.create("i"));
 		options.addOptionGroup(evals);
 	}
 }
