@@ -17,7 +17,8 @@ public enum FilterVar
 	STARS,
 	WATCHERS,
 	FORKS,
-	SUBSCRIBERS;
+	SUBSCRIBERS,
+	REPO_GRABED;
 	
 	public static final EnumSet<FilterVar> all = EnumSet.allOf(FilterVar.class);
 	

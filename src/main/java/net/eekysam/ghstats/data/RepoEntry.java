@@ -37,6 +37,8 @@ public class RepoEntry
 				return this.name;
 			case SELECTED:
 				return this.selected;
+			case REPO_GRABED:
+				return this.repoData != null;
 			default:
 				if (this.repoData != null)
 				{

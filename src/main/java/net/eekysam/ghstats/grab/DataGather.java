@@ -1,6 +1,5 @@
 package net.eekysam.ghstats.grab;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -15,8 +14,6 @@ import org.apache.commons.cli.ParseException;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-
 import net.eekysam.ghstats.Action;
 import net.eekysam.ghstats.GitHub;
 import net.eekysam.ghstats.GitHub.GitHubException;
@@ -29,6 +26,8 @@ public class DataGather extends Action
 	public static Options options = new Options();
 	
 	private CommandLine cmd;
+	
+	private int numError = 0;
 	
 	public DataGather(GitHub gh, DataFile data, String[] pars) throws ParseException
 	{
@@ -61,7 +60,10 @@ public class DataGather extends Action
 				Instant last = repo.reqs.get(req);
 				if (last == null || (useGate && (gate == null || last.isBefore(gate))))
 				{
-					this.gather(repo, req);
+					if (!this.gather(repo, req))
+					{
+						break;
+					}
 					num++;
 				}
 			}
@@ -69,7 +71,7 @@ public class DataGather extends Action
 		System.out.printf("Gathered info for %d repos%n", num);
 	}
 	
-	public void gather(RepoEntry entry, GatherReq req)
+	public boolean gather(RepoEntry entry, GatherReq req)
 	{
 		Query query = Query.start("repos").path(entry.name);
 		if (req == GatherReq.REPO)
@@ -77,14 +79,12 @@ public class DataGather extends Action
 			try
 			{
 				this.data.readRepo(this.gh.getJson(query), true, Instant.now());
+				this.numError = 0;
 			}
-			catch (IOException | IllegalStateException | ClassCastException | JsonParseException e)
+			catch (Exception e)
 			{
-				e.printStackTrace();
-				if (e instanceof GitHubException)
-				{
-					return;
-				}
+				System.err.printf("Error when gathering %s for %s%n", req.name(), entry.name);
+				return !this.shouldErrorStop(e);
 			}
 		}
 		else if (req == GatherReq.LANGS)
@@ -99,13 +99,34 @@ public class DataGather extends Action
 				}
 				entry.langs = langs;
 				entry.reqs.put(req, Instant.now());
+				this.numError = 0;
 			}
-			catch (IOException | IllegalStateException | ClassCastException | JsonParseException e)
+			catch (Exception e)
 			{
-				e.printStackTrace();
-				return;
+				System.err.printf("Error when gathering % for %s%n", req.name(), entry.name);
+				return !this.shouldErrorStop(e);
 			}
 		}
+		return true;
+	}
+	
+	public boolean shouldErrorStop(Exception e)
+	{
+		this.numError++;
+		e.printStackTrace();
+		if (e instanceof GitHubException)
+		{
+			GitHubException ghe = (GitHubException) e;
+			if (Integer.parseInt(ghe.response.header.get("X-RateLimit-Remaining")) == 0)
+			{
+				return true;
+			}
+		}
+		if (this.numError > 10)
+		{
+			return true;
+		}
+		return false;
 	}
 	
 	static

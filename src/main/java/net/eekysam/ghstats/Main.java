@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 
 import net.eekysam.ghstats.data.DataFile;
+import net.eekysam.ghstats.export.ExportData;
 import net.eekysam.ghstats.filter.Filterer;
 import net.eekysam.ghstats.grab.DataGather;
 import net.eekysam.ghstats.sampler.SampleRandom;
@@ -150,6 +151,17 @@ public class Main
 				}
 				li = LimitInfo.get(gh);
 				System.out.println(li.core);
+			}
+			else if (cmd.hasOption("e"))
+			{
+				try
+				{
+					new ExportData(gh, data, operargs);
+				}
+				catch (IOException | ParseException e)
+				{
+					e.printStackTrace();
+				}
 			}
 			if (file != null)
 			{

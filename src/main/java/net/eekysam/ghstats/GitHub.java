@@ -5,9 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
@@ -26,23 +25,20 @@ public class GitHub
 			super();
 			this.response = response;
 		}
+		
+		@Override
+		public String getMessage()
+		{
+			return String.format("Code %d: %s", this.response.code, this.response.responseMessage);
+		}
 	}
 	
 	public static class GHResponse
 	{
-		public final InputStream response;
-		public final int code;
-		public final String responseMessage;
-		public final Map<String, List<String>> header;
-		
-		GHResponse(InputStream response, int code, String responseMessage, Map<String, List<String>> header)
-		{
-			super();
-			this.response = response;
-			this.code = code;
-			this.responseMessage = responseMessage;
-			this.header = header;
-		}
+		public InputStream response;
+		public int code;
+		public String responseMessage;
+		public Map<String, String> header;
 	}
 	
 	private String auth = null;
@@ -81,11 +77,24 @@ public class GitHub
 	{
 		HttpURLConnection con = this.newConnection(query);
 		con.connect();
-		GHResponse re = new GHResponse(con.getInputStream(), con.getResponseCode(), con.getResponseMessage(), con.getHeaderFields());
+		GHResponse re = new GHResponse();
+		re.code = con.getResponseCode();
+		re.responseMessage = con.getResponseMessage();
+		re.header = new HashMap<String, String>();
+		for (int i = 1; true; i++)
+		{
+			String key = con.getHeaderFieldKey(i);
+			if (key == null)
+			{
+				break;
+			}
+			re.header.put(key, con.getHeaderField(i));
+		}
 		if (re.code != HttpURLConnection.HTTP_OK)
 		{
 			throw new GitHubException(re);
 		}
+		re.response = con.getInputStream();
 		return re;
 	}
 	
