@@ -22,6 +22,15 @@ public enum ExportPresets
 		{
 			return new BoolPieExporter(repos);
 		}
+	},
+	LANGS
+	{
+		@Override
+		public Exporter export(List<RepoEntry> repos, ExportContext context)
+		{
+			return null;
+		}
+		
 	};
 	
 	public abstract Exporter export(List<RepoEntry> repos, ExportContext context);

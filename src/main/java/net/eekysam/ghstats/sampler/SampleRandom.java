@@ -16,6 +16,8 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.uncommons.maths.random.DefaultSeedGenerator;
+import org.uncommons.maths.random.SeedException;
 
 import com.jcabi.github.Github;
 import com.jcabi.github.Repo;
@@ -38,17 +40,28 @@ public class SampleRandom extends Action
 		int max = Integer.parseInt(this.cmd.getOptionValue("m"));
 		int sampleSize = Integer.parseInt(this.cmd.getOptionValue("s"));
 		int clusterSize = Integer.parseInt(this.cmd.getOptionValue("c"));
-		Random rand = new Random();
+		
+		RandomType randt = RandomType.MT;
 		if (this.cmd.hasOption("r"))
 		{
-			rand = new Random(Long.parseLong(this.cmd.getOptionValue("r")));
+			randt = RandomType.valueOf(this.cmd.getOptionValue("r").toUpperCase());
+		}
+		Random random;
+		try
+		{
+			random = randt.getRandom(DefaultSeedGenerator.getInstance());
+		}
+		catch (SeedException e)
+		{
+			e.printStackTrace();
+			return;
 		}
 		
 		ArrayList<Repo> sample = new ArrayList<Repo>();
 		
 		RepoSampler samp = new RepoSampler(this.gh, sample, max);
 		Instant start = Instant.now();
-		System.out.printf("Sampled %d repos in %.1fs%n", samp.sample(sampleSize, clusterSize, rand), Duration.between(start, Instant.now()).toMillis() / 1000.0F);
+		System.out.printf("Sampled %d repos in %.1fs%n", samp.sample(sampleSize, clusterSize, random), Duration.between(start, Instant.now()).toMillis() / 1000.0F);
 		
 		for (Repo repo : sample)
 		{
@@ -67,9 +80,9 @@ public class SampleRandom extends Action
 	@SuppressWarnings("static-access")
 	static void getOptions(Options options)
 	{
-		options.addOption(OptionBuilder.hasArg().isRequired(true).create("s"));
-		options.addOption(OptionBuilder.hasArg().isRequired(true).create("c"));
-		options.addOption(OptionBuilder.hasArg().isRequired(true).create("m"));
-		options.addOption(OptionBuilder.hasArg().withLongOpt("seed").create("r"));
+		options.addOption(OptionBuilder.hasArg().isRequired(true).withLongOpt("sample").create("s"));
+		options.addOption(OptionBuilder.hasArg().isRequired(true).withLongOpt("cluster").create("c"));
+		options.addOption(OptionBuilder.hasArg().isRequired(true).withLongOpt("max").create("m"));
+		options.addOption(OptionBuilder.hasArg().create("r"));
 	}
 }

@@ -1,12 +1,17 @@
 package net.eekysam.ghstats.sampler;
 
+import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
+import javax.json.JsonException;
+
 import com.jcabi.github.Github;
 import com.jcabi.github.Repo;
+import com.jcabi.http.Request;
+import com.jcabi.http.RequestURI;
 
 public class RepoSampler
 {
@@ -37,22 +42,46 @@ public class RepoSampler
 	public boolean sampleCluster(int clusterSize, long first)
 	{
 		Iterator<Repo> cluster = this.gh.repos().iterate("" + (first - 1)).iterator();
+		// Really nasty kludge to fix a bug in the com.jcabi.github library
+		try
+		{
+			Class<?> clazz = Class.forName("com.jcabi.github.RtValuePagination$Items");
+			Field reqfield = clazz.getDeclaredField("request");
+			reqfield.setAccessible(true);
+			RequestURI ruri = ((Request) reqfield.get(cluster)).uri();
+			if (!ruri.toString().contains("repositories"))
+			{
+				reqfield.set(cluster, ruri.path("/repositories").back());
+			}
+		}
+		catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException | SecurityException | ClassNotFoundException e)
+		{
+			e.printStackTrace();
+		}
 		this.clusters++;
 		int num = 0;
 		while (num < clusterSize)
 		{
-			Repo repo;
+			Repo repo = null;
 			try
 			{
 				repo = cluster.next();
 			}
-			catch (IllegalStateException | NoSuchElementException e)
+			catch (IllegalStateException | JsonException e)
 			{
+				e.printStackTrace();
+			}
+			catch (NoSuchElementException e)
+			{
+				e.printStackTrace();
 				return false;
 			}
-			this.sample.add(repo);
-			this.sampled++;
-			num++;
+			if (repo != null)
+			{
+				this.sample.add(repo);
+				this.sampled++;
+				num++;
+			}
 		}
 		return true;
 	}
