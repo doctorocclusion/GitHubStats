@@ -39,7 +39,7 @@ public class RepoSampler
 		Iterator<Repo> cluster = this.gh.repos().iterate("" + (first - 1)).iterator();
 		this.clusters++;
 		int num = 0;
-		while (clusterSize < num)
+		while (num < clusterSize)
 		{
 			Repo repo;
 			try
@@ -57,7 +57,7 @@ public class RepoSampler
 		return true;
 	}
 	
-	public int sample(int clusterSize, int sampleSize, Random rand)
+	public int sample(int sampleSize, int clusterSize, Random rand)
 	{
 		int startsamp = this.sampled;
 		while (this.sampled - startsamp < sampleSize)

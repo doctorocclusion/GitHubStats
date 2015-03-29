@@ -2,13 +2,15 @@ package net.eekysam.ghstats.data;
 
 import java.io.StringWriter;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.json.Json;
 
 import net.eekysam.ghstats.Main;
 import net.eekysam.ghstats.data.adapters.DataAdapter;
-import net.eekysam.ghstats.grab.GrabReq;
+import net.eekysam.ghstats.grab.GatherReq;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -43,6 +45,19 @@ public class DataFile
 		}
 	}
 	
+	public List<RepoEntry> selected()
+	{
+		ArrayList<RepoEntry> sel = new ArrayList<RepoEntry>();
+		for (RepoEntry repo : this.repos.values())
+		{
+			if (repo.selected)
+			{
+				sel.add(repo);
+			}
+		}
+		return sel;
+	}
+	
 	public RepoEntry addRepo(RepoData data, boolean direct, Instant req)
 	{
 		if (data == null)
@@ -57,7 +72,7 @@ public class DataFile
 		re.repoData = data;
 		if (req != null)
 		{
-			re.reqs.put(GrabReq.REPO, req);
+			re.reqs.put(GatherReq.REPO, req);
 		}
 		return re;
 	}
@@ -74,7 +89,7 @@ public class DataFile
 		this.readRepo(jo.get("source"), false, req);
 	}
 	
-	public JsonElement fromJavax(javax.json.JsonStructure javax)
+	public static JsonElement fromJavax(javax.json.JsonStructure javax)
 	{
 		StringWriter out = new StringWriter();
 		Json.createWriter(out).write(javax);

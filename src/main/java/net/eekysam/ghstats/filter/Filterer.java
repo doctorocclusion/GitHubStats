@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import net.eekysam.ghstats.Action;
 import net.eekysam.ghstats.data.DataFile;
+import net.eekysam.ghstats.data.RepoEntry;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -38,6 +39,10 @@ public class Filterer extends Action
 		CommandLineParser parser = new BasicParser();
 		this.cmd = parser.parse(Filterer.options, pars);
 		
+		int numa = 0;
+		int numr = 0;
+		int num = 0;
+		
 		if (this.cmd.hasOption("t"))
 		{
 			Object out = Filterer.evaler.evaluate(expr);
@@ -50,10 +55,82 @@ public class Filterer extends Action
 				System.out.println(out);
 			}
 		}
-		else
+		else if (this.cmd.hasOption("s"))
 		{
-			
+			for (RepoEntry repo : this.data.repos.values())
+			{
+				Object result = Filterer.evaler.evaluate(expr, repo);
+				if (result instanceof Boolean)
+				{
+					boolean old = repo.selected;
+					repo.selected = (Boolean) result;
+					boolean now = repo.selected;
+					if (old && !now)
+					{
+						numr++;
+					}
+					else if (!old && now)
+					{
+						numa++;
+					}
+				}
+				else
+				{
+					throw new IllegalArgumentException(String.format("The filter expression returned %s, it must return a boolean!", result.toString()));
+				}
+				if (repo.selected)
+				{
+					num++;
+				}
+			}
 		}
+		else if (this.cmd.hasOption("a"))
+		{
+			for (RepoEntry repo : this.data.repos.values())
+			{
+				if (!repo.selected)
+				{
+					Object result = Filterer.evaler.evaluate(expr, repo);
+					if (result instanceof Boolean && (Boolean) result)
+					{
+						repo.selected = true;
+						numa++;
+					}
+					else
+					{
+						throw new IllegalArgumentException(String.format("The filter expression returned %s, it must return a boolean!", result.toString()));
+					}
+				}
+				if (repo.selected)
+				{
+					num++;
+				}
+			}
+		}
+		else if (this.cmd.hasOption("r"))
+		{
+			for (RepoEntry repo : this.data.repos.values())
+			{
+				if (repo.selected)
+				{
+					Object result = Filterer.evaler.evaluate(expr, repo);
+					if (result instanceof Boolean && !(Boolean) result)
+					{
+						repo.selected = false;
+						numr++;
+					}
+					else
+					{
+						throw new IllegalArgumentException(String.format("The filter expression returned %s, it must return a boolean!", result.toString()));
+					}
+				}
+				if (repo.selected)
+				{
+					num++;
+				}
+			}
+		}
+		System.out.printf("Selection +%d -%d (%d/%d)%n", numa, numr, num, this.data.repos.size());
 	}
 	
 	static

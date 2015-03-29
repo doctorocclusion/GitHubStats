@@ -1,8 +1,10 @@
 package net.eekysam.ghstats.data;
 
+import java.time.Duration;
 import java.time.Instant;
 
 import net.eekysam.ghstats.data.adapters.InstantAdapter;
+import net.eekysam.ghstats.filter.FilterVar;
 
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
@@ -54,4 +56,35 @@ public class RepoData
 	public int networkCount;
 	@SerializedName("subscribers_count")
 	public int subscribersCount;
+	
+	public Object getVar(FilterVar var)
+	{
+		switch (var)
+		{
+			case ID:
+				return this.id;
+			case IS_FORK:
+				return this.isFork;
+			case CREATED:
+				return this.createdAt;
+			case UPDATED:
+				return this.updatedAt;
+			case PUSHED:
+				return this.pushedAt;
+			case SIZE:
+				return this.size;
+			case STARS:
+				return this.stargazersCount;
+			case WATCHERS:
+				return this.watchersCount;
+			case FORKS:
+				return this.forksCount;
+			case SUBSCRIBERS:
+				return this.subscribersCount;
+			case AGE:
+				return Duration.between(this.createdAt, Instant.now());
+			default:
+				return FilterVar.NOT_LOADED;
+		}
+	}
 }

@@ -1,5 +1,6 @@
 package net.eekysam.ghstats;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,6 +8,7 @@ import java.util.Arrays;
 
 import net.eekysam.ghstats.data.DataFile;
 import net.eekysam.ghstats.filter.Filterer;
+import net.eekysam.ghstats.grab.DataGather;
 import net.eekysam.ghstats.sampler.SampleRandom;
 
 import org.apache.commons.cli.BasicParser;
@@ -21,7 +23,6 @@ import org.apache.commons.cli.ParseException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import com.jcabi.github.Github;
 import com.jcabi.github.RtGithub;
 
@@ -115,9 +116,7 @@ public class Main
 				System.out.println(li.core);
 				try
 				{
-					SampleRandom sr = new SampleRandom(gh, data, operargs);
-					sr.sample();
-					sr.write();
+					new SampleRandom(gh, data, operargs);
 				}
 				catch (IOException | ParseException e)
 				{
@@ -130,21 +129,35 @@ public class Main
 			{
 				try
 				{
-					Filterer filter = new Filterer(gh, data, operargs);
+					new Filterer(gh, data, operargs);
 				}
 				catch (IOException | ParseException e)
 				{
 					e.printStackTrace();
 				}
 			}
+			else if (cmd.hasOption("g"))
+			{
+				LimitInfo li = LimitInfo.get(gh);
+				System.out.println(li.core);
+				try
+				{
+					new DataGather(gh, data, operargs);
+				}
+				catch (ParseException e)
+				{
+					e.printStackTrace();
+				}
+				li = LimitInfo.get(gh);
+				System.out.println(li.core);
+			}
 			if (file != null)
 			{
 				try
 				{
-					JsonWriter jwrite;
-					jwrite = new JsonWriter(Files.newBufferedWriter(file.toPath()));
-					gson.toJson(data, DataFile.class, jwrite);
-					jwrite.close();
+					BufferedWriter writer = Files.newBufferedWriter(file.toPath());
+					writer.write(gson.toJson(data, DataFile.class));
+					writer.close();
 				}
 				catch (IOException e)
 				{

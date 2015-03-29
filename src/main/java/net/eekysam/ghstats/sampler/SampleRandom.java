@@ -1,7 +1,12 @@
 package net.eekysam.ghstats.sampler;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
+
 import net.eekysam.ghstats.Action;
 import net.eekysam.ghstats.data.DataFile;
 
@@ -27,16 +32,31 @@ public class SampleRandom extends Action
 		super(gh, data);
 		CommandLineParser parser = new BasicParser();
 		this.cmd = parser.parse(SampleRandom.options, pars);
-	}
-	
-	public void sample()
-	{
 		
-	}
-	
-	public void write()
-	{
+		System.out.printf("%d repos stored%n", data.repos.size());
 		
+		int max = Integer.parseInt(this.cmd.getOptionValue("m"));
+		int sampleSize = Integer.parseInt(this.cmd.getOptionValue("s"));
+		int clusterSize = Integer.parseInt(this.cmd.getOptionValue("c"));
+		Random rand = new Random();
+		if (this.cmd.hasOption("r"))
+		{
+			rand = new Random(Long.parseLong(this.cmd.getOptionValue("r")));
+		}
+		
+		ArrayList<Repo> sample = new ArrayList<Repo>();
+		
+		RepoSampler samp = new RepoSampler(this.gh, sample, max);
+		Instant start = Instant.now();
+		System.out.printf("Sampled %d repos in %.1fs%n", samp.sample(sampleSize, clusterSize, rand), Duration.between(start, Instant.now()).toMillis() / 1000.0F);
+		
+		for (Repo repo : sample)
+		{
+			String name = repo.coordinates().user() + "/" + repo.coordinates().repo();
+			this.data.addRepo(name, true);
+		}
+		
+		System.out.printf("%d repos stored%n", data.repos.size());
 	}
 	
 	static
@@ -49,6 +69,7 @@ public class SampleRandom extends Action
 	{
 		options.addOption(OptionBuilder.hasArg().isRequired(true).create("s"));
 		options.addOption(OptionBuilder.hasArg().isRequired(true).create("c"));
+		options.addOption(OptionBuilder.hasArg().isRequired(true).create("m"));
 		options.addOption(OptionBuilder.hasArg().withLongOpt("seed").create("r"));
 	}
 }

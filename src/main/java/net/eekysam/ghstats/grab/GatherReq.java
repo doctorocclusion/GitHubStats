@@ -1,6 +1,6 @@
 package net.eekysam.ghstats.grab;
 
-public enum GrabReq
+public enum GatherReq
 {
 	REPO,
 	LANGS;

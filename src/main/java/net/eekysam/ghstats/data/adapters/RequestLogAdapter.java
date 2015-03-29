@@ -5,23 +5,23 @@ import java.time.Instant;
 import java.util.EnumMap;
 import java.util.Map.Entry;
 
-import net.eekysam.ghstats.grab.GrabReq;
+import net.eekysam.ghstats.grab.GatherReq;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
-public class RequestLogAdapter extends TypeAdapter<EnumMap<GrabReq, Instant>>
+public class RequestLogAdapter extends TypeAdapter<EnumMap<GatherReq, Instant>>
 {
 	static final InstantAdapter instant = new InstantAdapter();
 	
 	@Override
-	public void write(JsonWriter out, EnumMap<GrabReq, Instant> value) throws IOException
+	public void write(JsonWriter out, EnumMap<GatherReq, Instant> value) throws IOException
 	{
 		out.beginObject();
 		if (value != null)
 		{
-			for (Entry<GrabReq, Instant> req : value.entrySet())
+			for (Entry<GatherReq, Instant> req : value.entrySet())
 			{
 				if (req.getValue() != null)
 				{
@@ -34,9 +34,9 @@ public class RequestLogAdapter extends TypeAdapter<EnumMap<GrabReq, Instant>>
 	}
 	
 	@Override
-	public EnumMap<GrabReq, Instant> read(JsonReader in) throws IOException
+	public EnumMap<GatherReq, Instant> read(JsonReader in) throws IOException
 	{
-		EnumMap<GrabReq, Instant> reqs = new EnumMap<GrabReq, Instant>(GrabReq.class);
+		EnumMap<GatherReq, Instant> reqs = new EnumMap<GatherReq, Instant>(GatherReq.class);
 		in.beginObject();
 		while (in.hasNext())
 		{
@@ -44,7 +44,7 @@ public class RequestLogAdapter extends TypeAdapter<EnumMap<GrabReq, Instant>>
 			Instant time = instant.read(in);
 			try
 			{
-				reqs.put(GrabReq.valueOf(reqn), time);
+				reqs.put(GatherReq.valueOf(reqn), time);
 			}
 			catch (IllegalArgumentException e)
 			{

@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
 import net.eekysam.ghstats.data.adapters.LangsAdapter;
 import net.eekysam.ghstats.data.adapters.RequestLogAdapter;
 import net.eekysam.ghstats.filter.FilterVar;
-import net.eekysam.ghstats.grab.GrabReq;
+import net.eekysam.ghstats.grab.GatherReq;
 
 public class RepoEntry
 {
@@ -25,7 +25,7 @@ public class RepoEntry
 	public HashMap<String, Long> langs = new HashMap<String, Long>();
 	
 	@JsonAdapter(RequestLogAdapter.class)
-	public EnumMap<GrabReq, Instant> reqs = new EnumMap<GrabReq, Instant>(GrabReq.class);
+	public EnumMap<GatherReq, Instant> reqs = new EnumMap<GatherReq, Instant>(GatherReq.class);
 	
 	public Object getVar(FilterVar var)
 	{
@@ -38,7 +38,14 @@ public class RepoEntry
 			case SELECTED:
 				return this.selected;
 			default:
-				return FilterVar.NOT_LOADED;
+				if (this.repoData != null)
+				{
+					return this.repoData.getVar(var);
+				}
+				else
+				{
+					return FilterVar.NOT_LOADED;
+				}
 		}
 	}
 	
