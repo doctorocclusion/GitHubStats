@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import net.eekysam.ghstats.Action;
+import net.eekysam.ghstats.GitHub;
 import net.eekysam.ghstats.data.DataFile;
 import net.eekysam.ghstats.data.RepoEntry;
 
@@ -15,8 +16,6 @@ import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import com.jcabi.github.Github;
-
 public class Filterer extends Action
 {
 	public static Options options = new Options();
@@ -24,7 +23,7 @@ public class Filterer extends Action
 	
 	private CommandLine cmd;
 	
-	public Filterer(Github gh, DataFile data, String[] pars) throws IOException, ParseException
+	public Filterer(GitHub gh, DataFile data, String[] pars) throws IOException, ParseException
 	{
 		super(gh, data);
 		

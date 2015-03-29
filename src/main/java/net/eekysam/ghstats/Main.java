@@ -23,8 +23,6 @@ import org.apache.commons.cli.ParseException;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
-import com.jcabi.github.Github;
-import com.jcabi.github.RtGithub;
 
 public class Main
 {
@@ -55,14 +53,14 @@ public class Main
 			return;
 		}
 		
-		Github gh = null;
+		GitHub gh;
 		if (cmd.hasOption("u"))
 		{
-			gh = new RtGithub(cmd.getOptionValue("u"));
+			gh = new GitHub(cmd.getOptionValue("u"));
 		}
 		else
 		{
-			gh = new RtGithub();
+			gh = new GitHub();
 		}
 		
 		if (cmd.hasOption("l"))

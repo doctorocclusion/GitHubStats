@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Random;
 
 import net.eekysam.ghstats.Action;
+import net.eekysam.ghstats.GitHub;
 import net.eekysam.ghstats.data.DataFile;
 
 import org.apache.commons.cli.BasicParser;
@@ -19,17 +19,13 @@ import org.apache.commons.cli.ParseException;
 import org.uncommons.maths.random.DefaultSeedGenerator;
 import org.uncommons.maths.random.SeedException;
 
-import com.jcabi.github.Github;
-import com.jcabi.github.Repo;
-
 public class SampleRandom extends Action
 {
 	public static Options options = new Options();
 	
-	public HashSet<Repo> sample = new HashSet<Repo>();
 	private CommandLine cmd;
 	
-	public SampleRandom(Github gh, DataFile data, String[] pars) throws IOException, ParseException
+	public SampleRandom(GitHub gh, DataFile data, String[] pars) throws IOException, ParseException
 	{
 		super(gh, data);
 		CommandLineParser parser = new BasicParser();
@@ -57,16 +53,15 @@ public class SampleRandom extends Action
 			return;
 		}
 		
-		ArrayList<Repo> sample = new ArrayList<Repo>();
+		ArrayList<String> sample = new ArrayList<String>();
 		
 		RepoSampler samp = new RepoSampler(this.gh, sample, max);
 		Instant start = Instant.now();
 		System.out.printf("Sampled %d repos in %.1fs%n", samp.sample(sampleSize, clusterSize, random), Duration.between(start, Instant.now()).toMillis() / 1000.0F);
 		
-		for (Repo repo : sample)
+		for (String repo : sample)
 		{
-			String name = repo.coordinates().user() + "/" + repo.coordinates().repo();
-			this.data.addRepo(name, true);
+			this.data.addRepo(repo, true);
 		}
 		
 		System.out.printf("%d repos stored%n", data.repos.size());

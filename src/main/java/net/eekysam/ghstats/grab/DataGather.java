@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.Iterator;
-
-import javax.json.JsonException;
+import java.util.Map.Entry;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -15,12 +13,14 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import com.jcabi.github.Coordinates;
-import com.jcabi.github.Github;
-import com.jcabi.github.Language;
-import com.jcabi.github.Repo;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 
 import net.eekysam.ghstats.Action;
+import net.eekysam.ghstats.GitHub;
+import net.eekysam.ghstats.GitHub.GitHubException;
+import net.eekysam.ghstats.Query;
 import net.eekysam.ghstats.data.DataFile;
 import net.eekysam.ghstats.data.RepoEntry;
 
@@ -30,7 +30,7 @@ public class DataGather extends Action
 	
 	private CommandLine cmd;
 	
-	public DataGather(Github gh, DataFile data, String[] pars) throws ParseException
+	public DataGather(GitHub gh, DataFile data, String[] pars) throws ParseException
 	{
 		super(gh, data);
 		
@@ -71,35 +71,39 @@ public class DataGather extends Action
 	
 	public void gather(RepoEntry entry, GatherReq req)
 	{
-		Repo repo = this.gh.repos().get(new Coordinates.Simple(entry.name));
+		Query query = Query.start("repos").path(entry.name);
 		if (req == GatherReq.REPO)
 		{
 			try
 			{
-				this.data.readRepo(DataFile.fromJavax(repo.json()), true, Instant.now());
+				this.data.readRepo(this.gh.getJson(query), true, Instant.now());
 			}
-			catch (IOException | JsonException | IllegalStateException e)
+			catch (IOException | IllegalStateException | ClassCastException | JsonParseException e)
 			{
 				e.printStackTrace();
+				if (e instanceof GitHubException)
+				{
+					return;
+				}
 			}
 		}
 		else if (req == GatherReq.LANGS)
 		{
 			try
 			{
-				Iterator<Language> langsit = repo.languages().iterator();
+				JsonObject json = this.gh.getJson(query.path("languages")).getAsJsonObject();
 				HashMap<String, Long> langs = new HashMap<String, Long>();
-				while (langsit.hasNext())
+				for (Entry<String, JsonElement> lang : json.entrySet())
 				{
-					Language lang = langsit.next();
-					langs.put(lang.name(), lang.bytes());
+					langs.put(lang.getKey(), lang.getValue().getAsLong());
 				}
 				entry.langs = langs;
 				entry.reqs.put(req, Instant.now());
 			}
-			catch (IOException | JsonException | IllegalStateException e)
+			catch (IOException | IllegalStateException | ClassCastException | JsonParseException e)
 			{
 				e.printStackTrace();
+				return;
 			}
 		}
 	}

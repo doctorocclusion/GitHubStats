@@ -10,7 +10,6 @@ dependencies
 {
 	compile 'com.google.guava:guava:18.0'
 	compile 'com.google.code.gson:gson:2.3.1'
-	compile 'com.jcabi:jcabi-github:0.21.4'
 	compile 'commons-cli:commons-cli:1.2'
 	compile 'com.fathzer:javaluator:3.0.0'
 	compile 'io.gatling.uncommons.maths:uncommons-maths:1.2.3'

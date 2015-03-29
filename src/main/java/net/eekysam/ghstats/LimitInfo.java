@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 
-import javax.json.JsonObject;
-
-import com.jcabi.github.Github;
-import com.jcabi.github.Limits;
+import com.google.gson.JsonObject;
 
 public class LimitInfo
 {
@@ -26,9 +23,9 @@ public class LimitInfo
 		
 		public static RateLimit fromJson(JsonObject json)
 		{
-			int limit = json.getInt("limit");
-			int remaining = json.getInt("remaining");
-			long reset = json.getJsonNumber("reset").longValue();
+			int limit = json.get("limit").getAsInt();
+			int remaining = json.get("remaining").getAsInt();
+			long reset = json.get("reset").getAsLong();
 			return new RateLimit(limit, remaining, reset);
 		}
 		
@@ -59,23 +56,18 @@ public class LimitInfo
 		this.search = search;
 	}
 	
-	public static LimitInfo get(Limits limits) throws IOException
+	public static LimitInfo get(GitHub gh)
 	{
-		RateLimit core = RateLimit.fromJson(limits.get("core").json());
-		RateLimit search = RateLimit.fromJson(limits.get("search").json());
-		return new LimitInfo(core, search);
-	}
-	
-	public static LimitInfo get(Github gh)
-	{
+		JsonObject json;
 		try
 		{
-			return LimitInfo.get(gh.limits());
+			json = gh.getJson(Query.start("rate_limit")).getAsJsonObject().getAsJsonObject("resources");
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 			return null;
 		}
+		return new LimitInfo(RateLimit.fromJson(json.getAsJsonObject("core")), RateLimit.fromJson(json.getAsJsonObject("search")));
 	}
 }

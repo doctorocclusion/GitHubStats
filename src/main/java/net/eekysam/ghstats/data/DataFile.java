@@ -1,12 +1,9 @@
 package net.eekysam.ghstats.data;
 
-import java.io.StringWriter;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import javax.json.Json;
 
 import net.eekysam.ghstats.Main;
 import net.eekysam.ghstats.data.adapters.DataAdapter;
@@ -14,7 +11,6 @@ import net.eekysam.ghstats.grab.GatherReq;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.JsonAdapter;
 
 @JsonAdapter(DataAdapter.class)
@@ -87,12 +83,5 @@ public class DataFile
 		this.addRepo(Main.gson.fromJson(jo, RepoData.class), direct, req);
 		this.readRepo(jo.get("parent"), false, req);
 		this.readRepo(jo.get("source"), false, req);
-	}
-	
-	public static JsonElement fromJavax(javax.json.JsonStructure javax)
-	{
-		StringWriter out = new StringWriter();
-		Json.createWriter(out).write(javax);
-		return (new JsonParser()).parse(out.toString());
 	}
 }

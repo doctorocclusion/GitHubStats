@@ -7,9 +7,8 @@ import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import com.jcabi.github.Github;
-
 import net.eekysam.ghstats.Action;
+import net.eekysam.ghstats.GitHub;
 import net.eekysam.ghstats.data.DataFile;
 
 public class ExportData extends Action
@@ -19,7 +18,7 @@ public class ExportData extends Action
 	private CommandLine cmd;
 	public ExportContext context;
 	
-	public ExportData(Github gh, DataFile data, String[] pars) throws ParseException
+	public ExportData(GitHub gh, DataFile data, String[] pars) throws ParseException
 	{
 		super(gh, data);
 		
