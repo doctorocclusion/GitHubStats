@@ -32,7 +32,7 @@ public class RepoEntry
 		switch (var)
 		{
 			case DIRECT:
-				return this.selected;
+				return this.direct;
 			case NAME:
 				return this.name;
 			case SELECTED:

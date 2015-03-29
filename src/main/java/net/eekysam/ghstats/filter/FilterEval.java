@@ -33,6 +33,9 @@ public class FilterEval extends AbstractEvaluator<Object>
 	public static final Operator SUB = new Operator("--", 2, Operator.Associativity.LEFT, 3);
 	public static final Operator DIFF = new Operator("<>", 2, Operator.Associativity.LEFT, 3);
 	
+	public static final Operator STARTS = new Operator("^*", 2, Operator.Associativity.LEFT, 5);
+	public static final Operator ENDS = new Operator("*^", 2, Operator.Associativity.LEFT, 5);
+	
 	public final static Constant TRUE = new Constant("true");
 	public final static Constant FALSE = new Constant("false");
 	public final static Constant NOW = new Constant("now");
@@ -62,6 +65,9 @@ public class FilterEval extends AbstractEvaluator<Object>
 		PARAMS.add(TRUE);
 		PARAMS.add(FALSE);
 		PARAMS.add(NOW);
+		
+		PARAMS.add(STARTS);
+		PARAMS.add(ENDS);
 		
 		PARAMS.addFunctionBracket(BracketPair.PARENTHESES);
 		PARAMS.addExpressionBracket(BracketPair.PARENTHESES);
@@ -320,9 +326,17 @@ public class FilterEval extends AbstractEvaluator<Object>
 		{
 			return !o1.equalsIgnoreCase(o2);
 		}
+		else if (op == STARTS)
+		{
+			return o1.startsWith(o2);
+		}
+		else if (op == ENDS)
+		{
+			return o1.endsWith(o2);
+		}
 		else
 		{
-			throw new IllegalArgumentException(String.format("Strings can only be added (%s) or compared with %s or %s.", ADD.getSymbol(), EQUAL.getSymbol(), NEQUAL.getSymbol()));
+			throw new IllegalArgumentException(String.format("Strings can only be added (%s) or compared with %s, %s, %s, or %s.", ADD.getSymbol(), EQUAL.getSymbol(), NEQUAL.getSymbol(), STARTS.getSymbol(), ENDS.getSymbol()));
 		}
 	}
 	

@@ -21,9 +21,7 @@ import com.jcabi.github.Language;
 import com.jcabi.github.Repo;
 
 import net.eekysam.ghstats.Action;
-import net.eekysam.ghstats.Main;
 import net.eekysam.ghstats.data.DataFile;
-import net.eekysam.ghstats.data.RepoData;
 import net.eekysam.ghstats.data.RepoEntry;
 
 public class DataGather extends Action
@@ -54,7 +52,9 @@ public class DataGather extends Action
 		}
 		
 		int num = 0;
-		for (RepoEntry repo : this.data.repos.values())
+		RepoEntry[] res = new RepoEntry[this.data.repos.size()];
+		this.data.repos.values().toArray(res);
+		for (RepoEntry repo : res)
 		{
 			if (repo.selected)
 			{
@@ -76,7 +76,7 @@ public class DataGather extends Action
 		{
 			try
 			{
-				entry.repoData = Main.gson.fromJson(DataFile.fromJavax(repo.json()), RepoData.class);
+				this.data.readRepo(DataFile.fromJavax(repo.json()), true, Instant.now());
 			}
 			catch (IOException | JsonException | IllegalStateException e)
 			{
@@ -95,13 +95,13 @@ public class DataGather extends Action
 					langs.put(lang.name(), lang.bytes());
 				}
 				entry.langs = langs;
+				entry.reqs.put(req, Instant.now());
 			}
 			catch (IOException | JsonException | IllegalStateException e)
 			{
 				e.printStackTrace();
 			}
 		}
-		entry.reqs.put(req, Instant.now());
 	}
 	
 	static

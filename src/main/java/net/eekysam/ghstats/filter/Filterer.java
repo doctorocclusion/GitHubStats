@@ -91,10 +91,13 @@ public class Filterer extends Action
 				if (!repo.selected)
 				{
 					Object result = Filterer.evaler.evaluate(expr, repo);
-					if (result instanceof Boolean && (Boolean) result)
+					if (result instanceof Boolean)
 					{
-						repo.selected = true;
-						numa++;
+						if ((Boolean) result)
+						{
+							repo.selected = true;
+							numa++;
+						}
 					}
 					else
 					{
@@ -114,10 +117,13 @@ public class Filterer extends Action
 				if (repo.selected)
 				{
 					Object result = Filterer.evaler.evaluate(expr, repo);
-					if (result instanceof Boolean && !(Boolean) result)
+					if (result instanceof Boolean)
 					{
-						repo.selected = false;
-						numr++;
+						if ((Boolean) result)
+						{
+							repo.selected = false;
+							numr++;
+						}
 					}
 					else
 					{

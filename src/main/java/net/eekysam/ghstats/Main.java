@@ -107,8 +107,10 @@ public class Main
 			}
 			if (cmd.hasOption("a"))
 			{
-				String repo = String.join(" ", operargs);
-				data.addRepo(repo, true);
+				for (String repo : operargs)
+				{
+					data.addRepo(repo, true);
+				}
 			}
 			else if (cmd.hasOption("s"))
 			{
