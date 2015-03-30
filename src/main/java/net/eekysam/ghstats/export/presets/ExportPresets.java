@@ -36,6 +36,14 @@ public enum ExportPresets
 			Exporter perc = new PercentLangExporter(context.minLang);
 			new ComboExporter(num, avg, perc).export(writer, repos);;
 		}
+	},
+	LANG
+	{
+		@Override
+		public void export(BufferedWriter writer, List<RepoEntry> repos, ExportContext context) throws IOException
+		{
+			new SingleLangExporter(context.minLang, context.lang).export(writer, repos);
+		}
 	};
 	
 	public abstract void export(BufferedWriter writer, List<RepoEntry> repos, ExportContext context) throws IOException;

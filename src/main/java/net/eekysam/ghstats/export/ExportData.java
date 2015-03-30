@@ -66,6 +66,7 @@ public class ExportData extends Action
 		options.addOption(OptionBuilder.hasArg().isRequired(true).create("f"));
 		options.addOption(OptionBuilder.hasArg().create("p"));
 		options.addOption(OptionBuilder.hasArg().create("t"));
+		options.addOption(OptionBuilder.hasArg().create("m"));
 		options.addOption(OptionBuilder.hasArg().create("l"));
 	}
 }

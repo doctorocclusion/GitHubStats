@@ -11,7 +11,7 @@ import com.google.common.collect.Table;
 import net.eekysam.ghstats.data.RepoEntry;
 import net.eekysam.ghstats.export.TableWriter;
 
-public abstract class Exporter
+public abstract class Exporter implements IExporter
 {
 	public abstract void start(List<RepoEntry> repos);
 	
@@ -19,6 +19,7 @@ public abstract class Exporter
 	
 	public abstract Table<String, String, ?> end();
 	
+	@Override
 	public void export(BufferedWriter writer, List<RepoEntry> repos) throws IOException
 	{
 		this.start(repos);
