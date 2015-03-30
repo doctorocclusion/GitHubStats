@@ -87,6 +87,10 @@ public class Filterer extends Action
 							numa++;
 						}
 					}
+					else if (result == FilterVar.NOT_LOADED)
+					{
+						System.out.printf("Some data for %s was not loaded.%n", repo.name);
+					}
 					else
 					{
 						throw new IllegalArgumentException(String.format("The filter expression returned %s, it must return a boolean!", result.toString()));

@@ -14,9 +14,8 @@ public class BasicEventsExporter extends Exporter
 	private ArrayTable<String, String, String> table;
 	private TimeExport time;
 	
-	public BasicEventsExporter(List<RepoEntry> entries, TimeExport time)
+	public BasicEventsExporter(TimeExport time)
 	{
-		super(entries);
 		this.time = time;
 	}
 	

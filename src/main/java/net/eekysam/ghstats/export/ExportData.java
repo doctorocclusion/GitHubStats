@@ -18,7 +18,6 @@ import net.eekysam.ghstats.GitHub;
 import net.eekysam.ghstats.data.DataFile;
 import net.eekysam.ghstats.data.RepoEntry;
 import net.eekysam.ghstats.export.presets.ExportPresets;
-import net.eekysam.ghstats.export.presets.Exporter;
 
 public class ExportData extends Action
 {
@@ -50,8 +49,7 @@ public class ExportData extends Action
 		
 		if (this.cmd.hasOption("p"))
 		{
-			Exporter exporter = ExportPresets.valueOf(this.cmd.getOptionValue("p")).export(repos, this.context);
-			exporter.export(writer);
+			ExportPresets.valueOf(this.cmd.getOptionValue("p")).export(writer, repos, this.context);
 		}
 		
 		writer.close();
@@ -68,5 +66,6 @@ public class ExportData extends Action
 		options.addOption(OptionBuilder.hasArg().isRequired(true).create("f"));
 		options.addOption(OptionBuilder.hasArg().create("p"));
 		options.addOption(OptionBuilder.hasArg().create("t"));
+		options.addOption(OptionBuilder.hasArg().create("l"));
 	}
 }

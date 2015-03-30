@@ -22,7 +22,7 @@ public class RepoEntry
 	public RepoData repoData;
 	
 	@JsonAdapter(LangsAdapter.class)
-	public HashMap<String, Long> langs = new HashMap<String, Long>();
+	public HashMap<String, Long> langs = null;
 	
 	@JsonAdapter(RequestLogAdapter.class)
 	public EnumMap<GatherReq, Instant> reqs = new EnumMap<GatherReq, Instant>(GatherReq.class);
@@ -49,6 +49,20 @@ public class RepoEntry
 					return FilterVar.NOT_LOADED;
 				}
 		}
+	}
+	
+	public long getLang(String lang)
+	{
+		if (this.langs == null)
+		{
+			throw new IllegalStateException(String.format("Langs not loaded for %s", this.name));
+		}
+		Long bytes = this.langs.get(lang);
+		if (bytes == null)
+		{
+			return 0;
+		}
+		return bytes;
 	}
 	
 	@Override

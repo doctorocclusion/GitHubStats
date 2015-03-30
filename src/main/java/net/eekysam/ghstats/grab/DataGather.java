@@ -103,7 +103,7 @@ public class DataGather extends Action
 			}
 			catch (Exception e)
 			{
-				System.err.printf("Error when gathering % for %s%n", req.name(), entry.name);
+				System.err.printf("Error when gathering %s for %s%n", req.name(), entry.name);
 				return !this.shouldErrorStop(e);
 			}
 		}

@@ -11,9 +11,8 @@ public class ComboExporter extends Exporter
 {
 	Exporter[] exporters;
 	
-	public ComboExporter(List<RepoEntry> entries, Exporter... exporters)
+	public ComboExporter(Exporter... exporters)
 	{
-		super(entries);
 		this.exporters = exporters;
 	}
 	

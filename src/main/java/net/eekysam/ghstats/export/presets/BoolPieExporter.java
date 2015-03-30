@@ -12,11 +12,6 @@ public class BoolPieExporter extends Exporter
 {
 	public long[][] nums;
 	
-	public BoolPieExporter(List<RepoEntry> entries)
-	{
-		super(entries);
-	}
-	
 	@Override
 	public void start(List<RepoEntry> entries)
 	{

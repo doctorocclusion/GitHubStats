@@ -5,7 +5,6 @@ import java.io.IOException;
 import net.eekysam.ghstats.Main;
 import net.eekysam.ghstats.data.DataFile;
 import net.eekysam.ghstats.data.RepoEntry;
-
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;

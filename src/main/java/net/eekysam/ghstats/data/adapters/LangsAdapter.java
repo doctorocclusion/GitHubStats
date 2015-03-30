@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 public class LangsAdapter extends TypeAdapter<HashMap<String, Long>>
@@ -13,6 +14,11 @@ public class LangsAdapter extends TypeAdapter<HashMap<String, Long>>
 	@Override
 	public void write(JsonWriter out, HashMap<String, Long> value) throws IOException
 	{
+		if (value == null)
+		{
+			out.nullValue();
+			return;
+		}
 		out.beginObject();
 		if (value != null)
 		{
@@ -28,6 +34,10 @@ public class LangsAdapter extends TypeAdapter<HashMap<String, Long>>
 	@Override
 	public HashMap<String, Long> read(JsonReader in) throws IOException
 	{
+		if (in.peek() == JsonToken.NULL)
+		{
+			return null;
+		}
 		HashMap<String, Long> langs = new HashMap<String, Long>();
 		in.beginObject();
 		while (in.hasNext())

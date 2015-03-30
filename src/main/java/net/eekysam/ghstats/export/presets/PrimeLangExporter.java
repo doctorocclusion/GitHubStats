@@ -14,11 +14,6 @@ public class PrimeLangExporter extends Exporter
 {
 	HashMap<String, Long> counter;
 	
-	public PrimeLangExporter(List<RepoEntry> entries)
-	{
-		super(entries);
-	}
-	
 	@Override
 	public void start(List<RepoEntry> entries)
 	{

@@ -240,6 +240,10 @@ public class FilterEval extends AbstractEvaluator<Object>
 					return !(Boolean) o1;
 				}
 			}
+			else if (o1 == FilterVar.NOT_LOADED)
+			{
+				return FilterVar.NOT_LOADED;
+			}
 			throw new IllegalArgumentException(String.format("(%s) could not be evaluated with the %s operation.", o1, op.getSymbol()));
 		}
 	}
